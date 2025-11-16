@@ -9,7 +9,7 @@ El simulador permite registrar clientes, iniciar sesión, realizar retiros, dep�
 
 ---
 
-## 🧩 Funcionalidades del Sistema
+## Funcionalidades del Sistema
 
 ### ✔ Registro de Clientes
 - Almacena datos en un vector de clientes.
