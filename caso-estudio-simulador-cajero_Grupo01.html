@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Cajero Bancario</title>
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+        body {
+            background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .atm-header {
+            width: 100%;
+            background: linear-gradient(90deg, #1a2980 0%, #26d0ce 100%);
+            color: white;
+            border-radius: 18px 18px 0 0;
+            padding: 12px 0 8px 0;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(30, 60, 120, 0.10);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        .atm-header i {
+            font-size: 1.6rem;
+            color: #fff;
+        }
+        .atm-header h1 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: 1px;
+        }
+        .atm-container {
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(30, 60, 120, 0.18);
+            width: 800px;
+            min-width: 400px;
+            min-height: 480px;
+            height: 100vh;
+            max-height: 98vh;
+            overflow: hidden;
+            padding: 0 0 32px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        .atm-content {
+            width: 100%;
+            padding: 32px 28px 0 28px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .atm-welcome h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a2980;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+        .atm-welcome p {
+            font-size: 1.1rem;
+            color: #2980b9;
+            margin-bottom: 28px;
+        }
+        .atm-options {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 22px;
+            justify-items: center;
+            align-items: center;
+            margin: 0 auto;
+        }
+        .atm-btn {
+            width: 100%;
+            max-width: 180px;
+            min-width: 120px;
+            height: 110px;
+            background: linear-gradient(135deg, #e3f0fc 60%, #b3d8f7 100%);
+            border: 2.5px solid #3a8edb;
+            border-radius: 18px;
+            box-shadow: 0 2px 8px rgba(58,142,219,0.10), 0 0.5px 0.5px #fff inset;
+            color: #2176c7;
+            font-weight: 600;
+            font-size: 1.18rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: box-shadow 0.2s, transform 0.2s, background 0.2s;
+            cursor: pointer;
+            position: relative;
+        }
+        .atm-btn:hover, .atm-btn:focus {
+            background: linear-gradient(135deg, #d0e7fa 60%, #8fc4f7 100%);
+            box-shadow: 0 4px 16px rgba(58,142,219,0.18);
+            transform: translateY(-2px) scale(1.04);
+            border-color: #2176c7;
+        }
+        .atm-btn i {
+            font-size: 2.3rem;
+            margin-bottom: 10px;
+            color: #2176c7;
+            transition: color 0.2s;
+        }
+        .atm-btn:hover i, .atm-btn:focus i {
+            color: #165a96;
+        }
+        .atm-separator {
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, #1a2980 0%, #26d0ce 100%);
+            border-radius: 2px;
+            margin: 24px 0 18px 0;
+            opacity: 0.15;
+        }
+        .atm-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 320px;
+            width: 100%;
+        }
+        #registro:checked ~ .atm-container #pantalla-registro { display: flex; }
+        #login:checked ~ .atm-container #pantalla-login { display: flex; }
+        #bienvenida:checked ~ .atm-container #pantalla-bienvenida,
+        #retiro:checked ~ .atm-container #pantalla-retiro,
+        #deposito:checked ~ .atm-container #pantalla-deposito,
+        #pago:checked ~ .atm-container #pantalla-pago,
+        #consulta:checked ~ .atm-container #pantalla-consulta,
+        #mas:checked ~ .atm-container #pantalla-mas {
+            display: flex;
+        }
+        .atm-back {
+            margin-top: 18px;
+            background: #6dd5fa;
+            color: #2980b9;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 18px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            box-shadow: 0 2px 8px rgba(30, 60, 120, 0.10);
+        }
+        .atm-back:hover {
+            background: #2980b9;
+            color: #fff;
+        }
+        .atm-form {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+        .atm-form label {
+            font-size: 0.95rem;
+            color: #1a2980;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        /* Unificar y mejorar diseño de cajas de texto */
+        .atm-form-section input[type="text"],
+        .atm-form-section input[type="number"],
+        .atm-form-section input[type="password"],
+        .atm-form-section input[type="email"],
+        .atm-form-section input[type="tel"] {
+            width: 100%;
+            padding: 12px 18px;
+            margin-bottom: 18px;
+            border-radius: 10px;
+            border: 2px solid #b3d8f7;
+            font-size: 1.12rem;
+            box-sizing: border-box;
+            background: #f5fbff;
+            color: #2176c7;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(58,142,219,0.08);
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+        }
+        .atm-form-section input[type="password"] {
+            text-align: center;
+        }
+        .atm-form-section input:focus {
+            border-color: #2176c7;
+            box-shadow: 0 4px 16px rgba(58,142,219,0.18);
+            background: #eaf6fb;
+        }
+        .atm-form button {
+            padding: 10px 0;
+            background: linear-gradient(90deg, #1a2980 0%, #26d0ce 100%);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(30, 60, 120, 0.10);
+            transition: background 0.2s;
+        }
+        .atm-form button:hover {
+            background: linear-gradient(90deg, #26d0ce 0%, #1a2980 100%);
+        }
+        /* Estilo digital para saldo y resumen mínimo */
+        .atm-balance, .atm-summary {
+            background: linear-gradient(90deg, #232a3b 0%, #26d0ce 100%);
+            border-radius: 14px;
+            padding: 8px 0;
+            width: 100%;
+            max-width: 380px;
+            margin: 0 auto 14px auto;
+            text-align: center;
+            font-size: 1.13rem;
+            color: #eaf6fb;
+            font-family: 'Share Tech Mono', 'Segoe UI', monospace;
+            font-weight: 700;
+            box-shadow: 0 2px 16px rgba(38,208,206,0.10), 0 0 8px #26d0ce44 inset;
+            letter-spacing: 1.5px;
+            border: 2px solid #26d0ce;
+            text-shadow: 0 2px 8px #232a3b, 0 0 2px #26d0ce;
+        }
+        .atm-footer {
+            width: 100%;
+            background: linear-gradient(90deg, #1a2980 0%, #26d0ce 100%);
+            color: #fff;
+            border-radius: 0 0 18px 18px;
+            padding: 8px 0 6px 0;
+            text-align: center;
+            font-size: 1rem;
+            font-weight: 500;
+            letter-spacing: 1px;
+            box-shadow: 0 -2px 8px rgba(30, 60, 120, 0.10);
+            position: relative;
+        }
+        /* Eliminar las líneas decorativas */
+        .atm-lines {
+            display: none;
+        }
+        .atm-form-section {
+            margin: 28px 0 18px 0;
+            padding: 24px 32px;
+            background: #f5fbff;
+            border-radius: 16px;
+            box-shadow: 0 1px 8px rgba(58,142,219,0.07);
+        }
+        .atm-form-section label {
+            margin-bottom: 8px;
+            display: block;
+            font-weight: 600;
+            color: #2176c7;
+        }
+        .atm-form-section input[type="text"],
+        .atm-form-section input[type="number"] {
+            width: 100%;
+            padding: 10px 14px;
+            margin-bottom: 16px;
+            border-radius: 8px;
+            border: 1.5px solid #b3d8f7;
+            font-size: 1.08rem;
+            box-sizing: border-box;
+        }
+        .atm-form-section .atm-btn-action {
+            width: 100%;
+            margin-top: 10px;
+            margin-bottom: 8px;
+            padding: 12px 0;
+            font-size: 1.15rem;
+            border-radius: 10px;
+        }
+        /* Pantalla login y registro */
+        #registro:checked ~ .atm-container #pantalla-registro { display: flex; }
+        #login:checked ~ .atm-container #pantalla-login { display: flex; }
+        #bienvenida:checked ~ .atm-container #pantalla-bienvenida,
+        #retiro:checked ~ .atm-container #pantalla-retiro,
+        #deposito:checked ~ .atm-container #pantalla-deposito,
+        #pago:checked ~ .atm-container #pantalla-pago,
+        #consulta:checked ~ .atm-container #pantalla-consulta,
+        #mas:checked ~ .atm-container #pantalla-mas { display: flex; }
+        .atm-login {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 320px;
+        }
+        .atm-title {
+            font-weight: 700;
+            color: #1a2a6c;
+            margin-bottom: 5px;
+        }
+        .atm-pin-input {
+            width: 100%;
+            padding: 14px 18px;
+            font-size: 1.5rem;
+            letter-spacing: 0.5em;
+            text-align: center;
+            border-radius: 10px;
+            border: 2px solid #b3d8f7;
+            background: #f5fbff;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        .atm-btn-acceder {
+            background: linear-gradient(90deg, #1a2980 0%, #26d0ce 100%);
+            color: #fff !important;
+            text-shadow: 0 2px 8px rgba(30,60,120,0.22), 0 0 2px #1a2980;
+            font-weight: 900;
+            letter-spacing: 0.7px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.18rem;
+            padding: 14px 0;
+            width: 100%;
+            margin-top: 10px;
+            margin-bottom: 8px;
+            box-shadow: 0 2px 8px rgba(30, 60, 120, 0.10);
+            cursor: pointer;
+            text-align: center;
+            transition: background 0.2s, transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .atm-btn-acceder:hover, .atm-btn-acceder:focus {
+            background: linear-gradient(90deg, #26d0ce 0%, #1a2980 100%);
+            color: #fff !important;
+            text-shadow: 0 2px 8px rgba(30,60,120,0.32), 0 0 2px #1a2980;
+            transform: scale(1.04);
+        }
+        /* Estilos para el select y campo personalizado */
+        .atm-select {
+            width: 100%;
+            padding: 10px 14px;
+            margin-bottom: 16px;
+            border-radius: 8px;
+            border: 1.5px solid #b3d8f7;
+            font-size: 1.08rem;
+            box-sizing: border-box;
+            background: #f5fbff;
+            color: #2176c7;
+            font-weight: 600;
+        }
+        /* Estilos para menú de billetes lateral */
+        .atm-form-billetes {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+        }
+        .atm-billetes-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .atm-billetes-menu-right {
+            margin-left: 18px;
+        }
+        .atm-form-billete-central {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: 180px;
+            margin: 0 18px;
+        }
+        .atm-billete-btn {
+            background: linear-gradient(90deg, #1a2980 0%, #26d0ce 100%);
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.08rem;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 0;
+            width: 90px;
+            box-shadow: 0 2px 8px rgba(30, 60, 120, 0.10);
+            cursor: pointer;
+            transition: background 0.2s, transform 0.2s;
+            text-align: center;
+        }
+        .atm-billete-btn:hover, .atm-billete-btn:focus {
+            background: linear-gradient(90deg, #26d0ce 0%, #1a2980 100%);
+            color: #fff;
+            transform: scale(1.07);
+        }
+        /* Estilo para el botón Retirar en monto personalizado */
+        .atm-btn-retirar {
+            background: linear-gradient(90deg, #1a2980 0%, #26d0ce 100%);
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.12rem;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 0;
+            width: 160px;
+            box-shadow: 0 2px 8px rgba(30, 60, 120, 0.10);
+            cursor: pointer;
+            text-align: center;
+            margin-top: 6px;
+            transition: background 0.2s, transform 0.2s;
+            display: block;
+        }
+        .atm-btn-retirar:hover, .atm-btn-retirar:focus {
+            background: linear-gradient(90deg, #26d0ce 0%, #1a2980 100%);
+            color: #fff;
+            transform: scale(1.07);
+        }
+        /* Mejorar alineación de botones y campo personalizado en retiro/deposito */
+        .retiro-monto-personalizado,
+        .deposito-monto-personalizado {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 18px;
+            justify-content: center;
+            margin-top: 8px;
+        }
+        .retiro-monto-personalizado label,
+        .deposito-monto-personalizado label {
+            margin-bottom: 0;
+            margin-right: 8px;
+            min-width: 120px;
+            text-align: right;
+        }
+        .retiro-monto-personalizado input,
+        .deposito-monto-personalizado input {
+            margin-bottom: 0;
+            min-width: 140px;
+            max-width: 180px;
+        }
+        .atm-btn-retirar,
+        .atm-btn-cancelar {
+            margin-top: 0 !important;
+            min-width: 120px;
+            max-width: 160px;
+            font-size: 1.08rem;
+        }
+        @media (max-width: 500px) {
+            .atm-container {
+                width: 98vw;
+                padding: 0;
+            }
+            .atm-content {
+                padding: 10px 2vw 0 2vw;
+            }
+            .atm-btn {
+                width: 80px;
+                height: 80px;
+                font-size: 1.5rem;
+            }
+        }
+        @media (max-width: 700px) {
+            .atm-options {
+                grid-template-columns: repeat(2, 1fr);
+                grid-template-rows: repeat(3, 1fr);
+                gap: 16px;
+            }
+            .atm-btn {
+                max-width: 100%;
+                min-width: 80px;
+                height: 80px;
+                font-size: 1rem;
+            }
+            .atm-btn i {
+                font-size: 1.6rem;
+                margin-bottom: 7px;
+            }
+            .atm-form-section {
+                padding: 12px 8px;
+            }
+            .atm-form-billetes {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .atm-billetes-menu, .atm-billetes-menu-right {
+                flex-direction: row;
+                gap: 10px;
+                margin: 0;
+            }
+            .atm-form-billete-central {
+                margin: 10px 0;
+                min-width: 120px;
+            }
+            .atm-billete-btn {
+                width: 70px;
+                font-size: 0.95rem;
+                padding: 10px 0;
+            }
+            .retiro-monto-personalizado,
+            .deposito-monto-personalizado {
+                flex-direction: column;
+                gap: 10px;
+                align-items: stretch;
+            }
+            .retiro-monto-personalizado label,
+            .deposito-monto-personalizado label {
+                text-align: left;
+                margin-right: 0;
+                min-width: 0;
+            }
+        }
+        /* Mostrar campo personalizado solo si radio 'otros' está seleccionado */
+        .retiro-monto-personalizado,
+        .deposito-monto-personalizado {
+            display: none;
+        }
+        #retiro-otros:checked ~ .atm-container #pantalla-retiro .retiro-monto-personalizado {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #retiro-10:checked ~ .atm-container #pantalla-retiro .retiro-monto-personalizado {
+            display: none;
+        }
+        #deposito-otros:checked ~ .atm-container #pantalla-deposito .deposito-monto-personalizado {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #deposito-10:checked ~ .atm-container #pantalla-deposito .deposito-monto-personalizado {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Radio buttons para navegación -->
+    <input type="radio" name="pantalla" id="registro" hidden>
+    <input type="radio" name="pantalla" id="login" checked hidden>
+    <input type="radio" name="pantalla" id="bienvenida" hidden>
+    <input type="radio" name="pantalla" id="retiro" hidden>
+    <input type="radio" name="pantalla" id="deposito" hidden>
+    <input type="radio" name="pantalla" id="pago" hidden>
+    <input type="radio" name="pantalla" id="consulta" hidden>
+    <input type="radio" name="pantalla" id="mas" hidden>
+
+
+    <div class="atm-container" style="width: 800px; min-width: 400px;">
+        <div class="atm-header">
+            <i class="fa-solid fa-credit-card"></i>
+            <h1>SIMULADOR BANCO VIRTUAL</h1>
+        </div>
+        <div class="atm-content">
+            <!-- Pantalla de registro de cliente -->
+            <div class="atm-screen" id="pantalla-registro">
+                <div class="atm-login">
+                    <h2 class="atm-title">Registro de Cliente</h2>
+                    <form class="atm-form-section" autocomplete="off" onsubmit="return false;">
+                        <label for="reg-dni">DNI</label>
+                        <input type="text" id="reg-dni" maxlength="10" pattern="\d{6,10}" placeholder="Ej: 123456789" required>
+                        <label for="reg-nombre">Nombres y Apellidos</label>
+                        <input type="text" id="reg-nombre" placeholder="Nombres Completos" required>
+                        <label for="reg-capital">Monto Capital Actual</label>
+                        <input type="number" id="reg-capital" min="0" step="1" placeholder="Ej: 1000" required>
+                        <label for="reg-pass">Contraseña (4 dígitos)</label>
+                        <input type="password" id="reg-pass" maxlength="4" pattern="\d{4}" placeholder="••••" required>
+                        <button type="submit" class="atm-btn-action atm-btn-acceder">Registrar <i class="fa-solid fa-user-plus"></i></button>
+                    </form>
+                    <label for="login" class="atm-back" tabindex="0" style="margin-top:18px;">Volver</label>
+                </div>
+            </div>
+            <!-- Pantalla de login -->
+            <div class="atm-screen" id="pantalla-login">
+                <div class="atm-login">
+                    <h2 class="atm-title">Bienvenido</h2>
+                    <form class="atm-form-section" autocomplete="off" onsubmit="return false;">
+                        <label for="dni-login">DNI</label>
+                        <input type="text" id="dni-login" maxlength="10" pattern="\d{6,10}" placeholder="Ej: 123456789" required>
+                        <label for="pass-login">Contraseña (4 dígitos)</label>
+                        <input type="password" id="pass-login" maxlength="4" pattern="\d{4}" placeholder="••••" required>
+                        <label for="bienvenida" class="atm-btn-action atm-btn-acceder" tabindex="0">Acceder <i class="fa-solid fa-arrow-right"></i></label>
+                    </form>
+                    <label for="registro" class="atm-back" tabindex="0" style="margin-top:18px;">Registrar cliente</label>
+                </div>
+            </div>
+            <!-- Pantalla de bienvenida -->
+            <div class="atm-screen" id="pantalla-bienvenida">
+                <div class="atm-welcome">
+                    <h2>Bienvenido</h2>
+                    <p>¿Qué transacción desea realizar?</p>
+                    <div class="atm-options">
+                        <label for="retiro" class="atm-btn" tabindex="0">
+                            <i class="fa-solid fa-money-bill-wave"></i>
+                            <span>Retirar</span>
+                        </label>
+                        <label for="deposito" class="atm-btn" tabindex="0">
+                            <i class="fa-solid fa-piggy-bank"></i>
+                            <span>Depositar</span>
+                        </label>
+                        <label for="pago" class="atm-btn" tabindex="0">
+                            <i class="fa-solid fa-file-invoice-dollar"></i>
+                            <span>Pagar</span>
+                        </label>
+                        <label for="consulta" class="atm-btn" tabindex="0">
+                            <i class="fa-solid fa-circle-info"></i>
+                            <span>Consultar</span>
+                        </label>
+                        <label for="mas" class="atm-btn" tabindex="0">
+                            <i class="fa-solid fa-ellipsis"></i>
+                            <span>Más opciones</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="atm-separator"></div>
+            <!-- Pantalla de Retiro -->
+            <div class="atm-screen" id="pantalla-retiro">
+                <h2>Retiro de Efectivo</h2>
+                <div class="atm-balance">Saldo actual: <span>$0.00</span></div>
+                <div class="atm-form-section">
+                    <form class="atm-form atm-form-billetes" onsubmit="return false;">
+                        <div class="atm-billetes-menu">
+                            <button type="button" class="atm-billete-btn" onclick="mostrarRetiroMonto(10)">$10</button>
+                            <button type="button" class="atm-billete-btn" onclick="mostrarRetiroMonto(20)">$20</button>
+                            <button type="button" class="atm-billete-btn" onclick="mostrarRetiroMonto(30)">$30</button>
+                            <button type="button" class="atm-billete-btn" onclick="mostrarRetiroMonto(50)">$50</button>
+                        </div>
+                        <div class="atm-form-billete-central">
+                            <div class="retiro-monto-personalizado" style="display:none;">
+                                <label for="monto-retiro">Monto personalizado</label>
+                                <input type="number" id="monto-retiro" min="10" step="10" placeholder="Ej: 150">
+                                <button type="button" class="atm-btn-action atm-btn-retirar">Retirar</button>
+                                <button type="button" class="atm-btn-action atm-btn-cancelar" onclick="ocultarRetiroMonto()">Cancelar</button>
+                            </div>
+                        </div>
+                        <div class="atm-billetes-menu atm-billetes-menu-right">
+                            <button type="button" class="atm-billete-btn" onclick="mostrarRetiroMonto(80)">$80</button>
+                            <button type="button" class="atm-billete-btn" onclick="mostrarRetiroMonto(100)">$100</button>
+                            <button type="button" class="atm-billete-btn" onclick="mostrarRetiroMonto('otros')">Otros</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="atm-summary">Retiro mínimo: $10 (múltiplos de $10)</div>
+                <label for="bienvenida" class="atm-back" tabindex="0">Volver</label>
+            </div>
+            <div class="atm-separator"></div>
+            <!-- Pantalla de Depósito -->
+            <div class="atm-screen" id="pantalla-deposito">
+                <h2>Depósito de Efectivo</h2>
+                <div class="atm-balance">Saldo actual: <span>$0.00</span></div>
+                <div class="atm-form-section">
+                    <form class="atm-form atm-form-billetes" onsubmit="return false;">
+                        <div class="atm-billetes-menu">
+                            <button type="button" class="atm-billete-btn" onclick="mostrarDepositoMonto(10)">$10</button>
+                            <button type="button" class="atm-billete-btn" onclick="mostrarDepositoMonto(20)">$20</button>
+                            <button type="button" class="atm-billete-btn" onclick="mostrarDepositoMonto(30)">$30</button>
+                            <button type="button" class="atm-billete-btn" onclick="mostrarDepositoMonto(50)">$50</button>
+                        </div>
+                        <div class="atm-form-billete-central">
+                            <div class="deposito-monto-personalizado" style="display:none;">
+                                <label for="monto-deposito">Monto personalizado</label>
+                                <input type="number" id="monto-deposito" min="10" step="10" placeholder="Ej: 150">
+                                <button type="button" class="atm-btn-action atm-btn-retirar">Depositar</button>
+                                <button type="button" class="atm-btn-action atm-btn-cancelar" onclick="ocultarDepositoMonto()">Cancelar</button>
+                            </div>
+                        </div>
+                        <div class="atm-billetes-menu atm-billetes-menu-right">
+                            <button type="button" class="atm-billete-btn" onclick="mostrarDepositoMonto(80)">$80</button>
+                            <button type="button" class="atm-billete-btn" onclick="mostrarDepositoMonto(100)">$100</button>
+                            <button type="button" class="atm-billete-btn" onclick="mostrarDepositoMonto('otros')">Otros</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="atm-summary">Depósito mínimo: $10 (múltiplos de $10)</div>
+                <label for="bienvenida" class="atm-back" tabindex="0">Volver</label>
+            </div>
+            <div class="atm-separator"></div>
+            <!-- Pantalla de Pago -->
+            <div class="atm-screen" id="pantalla-pago">
+                <h2>Pagar Servicio</h2>
+                <div class="atm-balance">Saldo actual: <span>$0.00</span></div>
+                <div class="atm-form-section">
+                    <form class="atm-form">
+                        <label for="servicio-pago">Servicio</label>
+                        <input type="text" id="servicio-pago" placeholder="Ej: Luz, Agua, Teléfono">
+                        <label for="monto-pago">Monto a pagar</label>
+                        <input type="number" id="monto-pago" min="1" placeholder="Ej: 25">
+                        <button type="submit" class="atm-btn-action">Pagar</button>
+                    </form>
+                </div>
+                <div class="atm-summary">Ingrese el nombre del servicio y el monto.</div>
+                <label for="bienvenida" class="atm-back" tabindex="0">Volver</label>
+            </div>
+            <div class="atm-separator"></div>
+            <!-- Pantalla de Consulta -->
+            <div class="atm-screen" id="pantalla-consulta">
+                <h2>Consulta de Saldo</h2>
+                <div class="atm-balance">Saldo actual: <span>$0.00</span></div>
+                <div class="atm-summary">Últimos movimientos:</div>
+                <label for="bienvenida" class="atm-back" tabindex="0">Volver</label>
+            </div>
+            <div class="atm-separator"></div>
+            <!-- Pantalla de Más Opciones -->
+            <div class="atm-screen" id="pantalla-mas">
+                <h2>Más Opciones</h2>
+                <div class="atm-summary">Otras funciones del cajero (simulación).</div>
+                <label for="bienvenida" class="atm-back" tabindex="0">Volver</label>
+            </div>
+        </div>
+        <!-- Pie de página sin líneas decorativas -->
+        <div class="atm-footer">
+            <span>© 2025 Banco Virtual | Simulador Educativo</span>
+        </div>
+    </div>
+
+    <script>
+    /* ============================
+       ESTRUCTURAS DE DATOS (VECTORES)
+       - clientes: [ [dni, nombre, saldo, pin], ... ]
+       - movimientos: [ [dni, tipo, descripcion, monto, fecha], ... ]
+       ============================ */
+
+    // Vector de clientes pre-cargados (ejemplos para pruebas)
+    var clientes = [
+        ['0987654321', 'Juan Pérez', 1500, '1234'],
+        ['0912345678', 'María González', 2500, '4321'],
+        ['0923456789', 'Carlos López', 800, '5678']
+    ];
+
+    // Vector de movimientos inicial vacío
+    var movimientos = []; // cada elemento: [dni, tipo, descripcion, monto, fecha]
+
+    // Índice del cliente actualmente logueado (-1 = ninguno)
+    var indiceClienteActivo = -1;
+
+    /* FUNCIONES AUXILIARES */
+
+    // Buscar índice de cliente por DNI (retorna -1 si no existe)
+    function buscarIndiceClientePorDNI(dni) {
+        for (var i = 0; i < clientes.length; i++) {
+            if (clientes[i][0] === dni) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    // Validar que una cadena sea numérica (solo dígitos)
+    function esNumerico(texto) {
+        var patron = /^[0-9]+$/;
+        return patron.test(texto);
+    }
+
+    // Obtener fecha y hora en formato local (es-EC)
+    function ahora() {
+        return new Date().toLocaleString('es-EC');
+    }
+
+    // Actualizar saldo en todas las pantallas (busca elementos .atm-balance span)
+    function actualizarSaldoEnPantallas() {
+        var spans = document.querySelectorAll('.atm-balance span');
+        var saldo = '0.00';
+        if (indiceClienteActivo !== -1) {
+            saldo = clientes[indiceClienteActivo][2].toFixed(2);
+        }
+        for (var i = 0; i < spans.length; i++) {
+            spans[i].textContent = '$' + saldo;
+        }
+    }
+
+    // Registrar movimiento en el vector movimientos
+    // Se usa asignación manual: movimientos[movimientos.length] = [...]
+    function agregarMovimiento(dni, tipo, descripcion, monto) {
+        var fecha = ahora();
+        // Si queremos limitar a N movimientos totales podríamos desplazar, pero la guía no obliga límite global
+        movimientos[movimientos.length] = [dni, tipo, descripcion, monto, fecha];
+    }
+
+    // Mostrar últimos 5 movimientos para el cliente activo en pantalla de consulta
+    function mostrarUltimosMovimientos() {
+        var contenedor = document.querySelector('#pantalla-consulta .atm-summary');
+        // limpiamos y dejamos el título
+        contenedor.innerHTML = 'Últimos movimientos:<br><br>';
+
+        if (indiceClienteActivo === -1) {
+            contenedor.innerHTML += 'No hay cliente activo.';
+            return;
+        }
+
+        var dni = clientes[indiceClienteActivo][0];
+        // Contador para últimos 5
+        var contador = 0;
+
+        // Recorremos movimientos de atrás hacia adelante con for
+        for (var i = movimientos.length - 1; i >= 0; i--) {
+            if (movimientos[i][0] === dni) {
+                // Mostrar: tipo, descripción, monto, fecha
+                contenedor.innerHTML += movimientos[i][1] + ' - ' + movimientos[i][2] + ' - $' + movimientos[i][3] + ' - ' + movimientos[i][4] + '<br>';
+                contador++;
+            }
+            if (contador === 5) break; // solo últimos 5
+        }
+
+        if (contador === 0) {
+            contenedor.innerHTML += 'No hay movimientos registrados.';
+        }
+    }
+
+    /* REGISTRO DE CLIENTES */
+    // Botón Registrar (pantalla registro) - se usa click en el botón dentro del form
+    (function () {
+        var btnRegistrar = document.querySelector('#pantalla-registro .atm-btn-acceder');
+
+        btnRegistrar.addEventListener('click', function () {
+            var dni = document.getElementById('reg-dni').value.trim();
+            var nombre = document.getElementById('reg-nombre').value.trim();
+            var capital = Number(document.getElementById('reg-capital').value);
+            var pin = document.getElementById('reg-pass').value.trim();
+
+            // Validaciones
+            if (dni === '' || nombre === '' || isNaN(capital) || pin === '') {
+                alert('Complete todos los campos.');
+                return;
+            }
+            if (!esNumerico(dni) || dni.length < 6 || dni.length > 10) {
+                alert('DNI inválido. Debe tener entre 6 y 10 dígitos numéricos.');
+                return;
+            }
+            if (!esNumerico(pin) || pin.length !== 4) {
+                alert('PIN inválido. Debe contener exactamente 4 dígitos numéricos.');
+                return;
+            }
+            if (capital < 0) {
+                alert('El capital inicial debe ser mayor o igual a 0.');
+                return;
+            }
+
+            // Verificar duplicado de DNI (usar for)
+            if (buscarIndiceClientePorDNI(dni) !== -1) {
+                alert('El DNI ya se encuentra registrado.');
+                return;
+            }
+
+            // Insertar nuevo cliente en vector (asignación manual)
+            clientes[clientes.length] = [dni, nombre, capital, pin];
+
+            alert('Registro exitoso. Ahora inicie sesión con sus credenciales.');
+            // Redirigir a login
+            document.getElementById('login').checked = true;
+        });
+    })();
+
+    /* LOGIN */
+    (function () {
+        // En la interfaz el "Acceder" es un <label for="bienvenida">, por tanto al hacer click
+        // el radio cambia. Interceptamos el click para validar primero.
+        var labelAcceder = document.querySelector('#pantalla-login .atm-btn-acceder');
+
+        labelAcceder.addEventListener('click', function (evt) {
+            var dni = document.getElementById('dni-login').value.trim();
+            var pin = document.getElementById('pass-login').value.trim();
+
+            // Validaciones básicas
+            if (dni === '' || pin === '') {
+                alert('Ingrese DNI y PIN.');
+                // Mantener en pantalla de login
+                document.getElementById('login').checked = true;
+                return;
+            }
+            if (!esNumerico(dni) || dni.length < 6 || dni.length > 10) {
+                alert('DNI inválido.');
+                document.getElementById('login').checked = true;
+                return;
+            }
+            if (!esNumerico(pin) || pin.length !== 4) {
+                alert('PIN inválido.');
+                document.getElementById('login').checked = true;
+                return;
+            }
+
+            // Buscar cliente
+            var idx = buscarIndiceClientePorDNI(dni);
+            if (idx === -1) {
+                alert('DNI no registrado.');
+                document.getElementById('login').checked = true;
+                return;
+            }
+
+            // Verificar PIN
+            if (clientes[idx][3] !== pin) {
+                alert('PIN incorrecto.');
+                document.getElementById('login').checked = true;
+                return;
+            }
+
+            // Login exitoso: fijar cliente activo
+            indiceClienteActivo = idx;
+
+            // Mostrar nombre en pantalla de bienvenida (personalización)
+            var h2Bienvenida = document.querySelector('#pantalla-bienvenida .atm-welcome h2');
+            // Si existe h2, actualizamos; si no (estructura distinta) buscamos otro selector
+            if (h2Bienvenida) {
+                h2Bienvenida.textContent = 'Bienvenido, ' + clientes[indiceClienteActivo][1];
+            }
+
+            // Mostrar pantalla de bienvenida
+            document.getElementById('bienvenida').checked = true;
+
+            // Actualizar saldos visibles
+            actualizarSaldoEnPantallas();
+
+            // Also clear login form fields (optional)
+            document.getElementById('dni-login').value = '';
+            document.getElementById('pass-login').value = '';
+        });
+    })();
+
+    /* RETIRO
+       - mostrarRetiroMonto(valor): si 'otros' muestra campo, si número procesa retiro
+       - realizar retiro con validaciones: múltiplo de 10, monto>0, saldo suficiente
+       - actualizar cliente en vector (clientes[indice][2] = nuevoSaldo)
+       - registrar movimiento en movimientos vector */
+
+    function mostrarRetiroMonto(valor) {
+        var campo = document.querySelector('.retiro-monto-personalizado');
+        if (valor === 'otros') {
+            campo.style.display = 'flex';
+        } else {
+            campo.style.display = 'none';
+            // Procesar retiro inmediato con el valor pasado
+            // (pero solo si hay un cliente activo)
+            if (indiceClienteActivo === -1) {
+                alert('Debe iniciar sesión primero.');
+                // devolver a pantalla login
+                document.getElementById('login').checked = true;
+                return;
+            }
+            // Valor puede venir como número o string con $
+            var monto = Number(valor);
+            procesarRetiro(monto);
+        }
+    }
+
+    function ocultarRetiroMonto() {
+        var campo = document.querySelector('.retiro-monto-personalizado');
+        campo.style.display = 'none';
+    }
+
+    // Procesamiento de retiro (usa for/if internamente cuando actualiza vectores)
+    function procesarRetiro(monto) {
+        // Validaciones
+        if (isNaN(monto) || monto <= 0) {
+            alert('Monto inválido.');
+            return;
+        }
+        if (monto % 10 !== 0) {
+            alert('El monto debe ser múltiplo de $10.');
+            return;
+        }
+        // Verificar cliente activo
+        if (indiceClienteActivo === -1) {
+            alert('Debe iniciar sesión.');
+            document.getElementById('login').checked = true;
+            return;
+        }
+
+        var saldo = clientes[indiceClienteActivo][2];
+        if (monto > saldo) {
+            alert('Fondos insuficientes.');
+            return;
+        }
+
+        // Actualizar saldo en el vector de clientes (asignación)
+        clientes[indiceClienteActivo][2] = saldo - monto;
+
+        // Registrar movimiento en vector movimientos
+        var descripcion = 'Retiro de efectivo';
+        var dni = clientes[indiceClienteActivo][0];
+        agregarMovimiento(dni, 'retiro', descripcion, monto);
+
+        // Actualizar saldos en pantalla
+        actualizarSaldoEnPantallas();
+
+        alert('Retiro exitoso. Nuevo saldo: $' + clientes[indiceClienteActivo][2].toFixed(2));
+    }
+
+    // Evento para boton "Retirar" del monto personalizado (dentro de pantalla retiro)
+    (function () {
+        var btnRetirarPersonal = document.querySelector('#pantalla-retiro .atm-btn-retirar');
+        if (btnRetirarPersonal) {
+            btnRetirarPersonal.addEventListener('click', function () {
+                var monto = Number(document.getElementById('monto-retiro').value);
+                procesarRetiro(monto);
+                // opcional: limpiar campo
+                document.getElementById('monto-retiro').value = '';
+                ocultarRetiroMonto();
+            });
+        }
+    })();
+
+    /* ============================
+       DEPOSITO
+       - mostrarDepositoMonto(valor): si 'otros' muestra campo, si número procesa depósito
+       - procesarDeposito: validaciones múltiples de 10
+       ============================ */
+
+    function mostrarDepositoMonto(valor) {
+        var campo = document.querySelector('.deposito-monto-personalizado');
+        if (valor === 'otros') {
+            campo.style.display = 'flex';
+        } else {
+            campo.style.display = 'none';
+            if (indiceClienteActivo === -1) {
+                alert('Debe iniciar sesión primero.');
+                document.getElementById('login').checked = true;
+                return;
+            }
+            var monto = Number(valor);
+            procesarDeposito(monto);
+        }
+    }
+
+    function ocultarDepositoMonto() {
+        var campo = document.querySelector('.deposito-monto-personalizado');
+        campo.style.display = 'none';
+    }
+
+    function procesarDeposito(monto) {
+        if (isNaN(monto) || monto <= 0) {
+            alert('Monto inválido.');
+            return;
+        }
+        if (monto % 10 !== 0) {
+            alert('El depósito debe ser múltiplo de $10.');
+            return;
+        }
+        if (indiceClienteActivo === -1) {
+            alert('Debe iniciar sesión.');
+            document.getElementById('login').checked = true;
+            return;
+        }
+
+        // Actualizar saldo
+        clientes[indiceClienteActivo][2] = clientes[indiceClienteActivo][2] + monto;
+
+        // Registrar movimiento
+        var descripcion = 'Depósito de efectivo';
+        var dni = clientes[indiceClienteActivo][0];
+        agregarMovimiento(dni, 'deposito', descripcion, monto);
+
+        actualizarSaldoEnPantallas();
+        alert('Depósito exitoso. Nuevo saldo: $' + clientes[indiceClienteActivo][2].toFixed(2));
+    }
+
+    // Evento para boton "Depositar" del monto personalizado
+    (function () {
+        var btnDepositarPersonal = document.querySelector('#pantalla-deposito .atm-btn-retirar');
+        if (btnDepositarPersonal) {
+            btnDepositarPersonal.addEventListener('click', function () {
+                var monto = Number(document.getElementById('monto-deposito').value);
+                procesarDeposito(monto);
+                document.getElementById('monto-deposito').value = '';
+                ocultarDepositoMonto();
+            });
+        }
+    })();
+
+    /* ============================
+       PAGO DE SERVICIOS
+       - Form submit en pantalla pago
+       ============================ */
+    (function () {
+        var formPago = document.querySelector('#pantalla-pago form');
+        if (formPago) {
+            formPago.addEventListener('submit', function (evt) {
+                evt.preventDefault();
+                var servicio = document.getElementById('servicio-pago').value.trim();
+                var monto = Number(document.getElementById('monto-pago').value);
+
+                if (servicio === '' || isNaN(monto) || monto <= 0) {
+                    alert('Ingrese servicio y monto válidos.');
+                    return;
+                }
+                if (indiceClienteActivo === -1) {
+                    alert('Debe iniciar sesión.');
+                    document.getElementById('login').checked = true;
+                    return;
+                }
+                if (monto > clientes[indiceClienteActivo][2]) {
+                    alert('Saldo insuficiente para el pago.');
+                    return;
+                }
+
+                // Actualizar saldo
+                clientes[indiceClienteActivo][2] = clientsafeAddSub(clienteIndex=indiceClienteActivo, delta=-monto);
+
+                // Registrar movimiento con detalle del servicio
+                var descripcion = 'Pago de ' + servicio;
+                var dni = clientes[indiceClienteActivo][0];
+                agregarMovimiento(dni, 'pago', descripcion, monto);
+
+                actualizarSaldoEnPantallas();
+
+                alert('Pago realizado por $' + monto.toFixed(2) + '. Nuevo saldo: $' + clientes[indiceClienteActivo][2].toFixed(2));
+
+                // Limpiar campos
+                document.getElementById('servicio-pago').value = '';
+                document.getElementById('monto-pago').value = '';
+            });
+        }
+    })();
+
+
+    // Función segura para sumar o restar saldo de un cliente
+    function clientsafeAddSub(clienteIndex, delta) {
+        // clienteIndex must be valid
+        if (clienteIndex < 0 || clienteIndex >= clientes.length) return 0;
+        var nuevo = clientes[clienteIndex][2] + delta;
+        clientes[clienteIndex][2] = nuevo;
+        return nuevo;
+    }
+
+    /* CONSULTA DE SALDO Y MOVIMIENTOS
+       - Se dispara al mostrar la pantalla de consulta (radio cambia) */
+    (function () {
+        var radioConsulta = document.getElementById('consulta');
+        if (radioConsulta) {
+            radioConsulta.addEventListener('change', function () {
+                actualizarSaldoEnPantallas();
+                mostrarUltimosMovimientos();
+            });
+        }
+    })();
+
+    /* ============================
+       Delegación de eventos para botones rápidos
+       - Recorremos todos los botones .atm-billete-btn con for
+       - Evitamos métodos modernos
+       ============================ */
+    (function () {
+        var botones = document.getElementsByClassName('atm-billete-btn');
+        for (var i = 0; i < botones.length; i++) {
+            // todos los botones llaman a mostrarRetiroMonto o mostrarDepositoMonto por el onclick del HTML
+            // pero agregamos un listener por seguridad que no rompe la lógica previa
+            (function (btn) {
+                btn.addEventListener('click', function () {
+                    // no hacemos nada extra aquí para no duplicar comportamiento
+                    // la función mostrarRetiroMonto / mostrarDepositoMonto define el flujo
+                });
+            })(botones[i]);
+        }
+    })();
+
+    /* ============================
+       Salida / cerrar sesión
+       - Puedes implementar un botón "Cerrar sesión" en "Más opciones" si se desea.
+       - Por ahora, si el usuario va a "registro" o "login" se considera sesión cerrada.
+       ============================ */
+
+    /*Inicialización: actualizar pantallas al cargar*/
+    (function () {
+        // Asegurarse que saldos muestren 0 o saldo del cliente (si alguno activo)
+        actualizarSaldoEnPantallas();
+    })();
+
+    </script>
+</body>
+</html>
